@@ -4,6 +4,7 @@ from course.models import Course, Lesson
 
 
 class CourseSerializer(serializers.ModelSerializer):
+    quantity_lesson = serializers.IntegerField(source='lesson_set.all.count')
 
     class Meta:
         model = Course
