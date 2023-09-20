@@ -46,10 +46,10 @@ class Command(BaseCommand):
 
         # Платеж
         payment_list = [
-            {'amount': 700, 'method': Payment.TRANSFER},
-            {'amount': 500, 'method': Payment.CASH},
-            {'amount': 650, 'method': Payment.CASH},
-            {'amount': 1000, 'method': Payment.TRANSFER},
+            {'id': 1, 'amount': 700, 'method': Payment.TRANSFER},
+            {'id': 2, 'amount': 500, 'method': Payment.CASH},
+            {'id': 3, 'amount': 650, 'method': Payment.CASH},
+            {'id': 4, 'amount': 1000, 'method': Payment.TRANSFER},
         ]
 
         payment_for_create = []
