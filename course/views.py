@@ -1,24 +1,41 @@
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import generics
-from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from course.models import Course, Lesson, Payment
-from course.permissions import IsOwnerOrModer, IsOwner
+from course.permissions import IsOwnerOrModer, IsOwner, NotModer
 from course.serializers import CourseSerializer, LessonSerializer, PaymentSerializer
 
 
 class CourseViewSet(ModelViewSet):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
-    permission_classes = [IsAuthenticated, IsOwnerOrModer]
+    permissions = {
+        'create': NotModer,
+        'retrieve': IsOwnerOrModer,
+        'list': IsAuthenticated,
+        'update': IsOwnerOrModer,
+        'partial_update': IsOwnerOrModer,
+        'destroy': IsOwner
+    }
+
+    def perform_create(self, serializer):
+        self.permission_classes = [NotModer]
+        new_course = serializer.save()
+        new_course.owner = self.request.user
+        new_course.save()
+
+    def get_permissions(self):
+        self.permission_classes = [self.permissions.get(self.action)]
+        return super().get_permissions()
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrModer]
+    permission_classes = [IsAuthenticated, NotModer]
 
     def perform_create(self, serializer):
         new_lesson = serializer.save()
@@ -41,7 +58,7 @@ class LessonRetrieveAPIView(generics.RetrieveAPIView):
 class LessonUpdateAPIView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsOwnerOrModer]
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):

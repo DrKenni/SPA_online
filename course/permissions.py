@@ -2,7 +2,7 @@ from rest_framework.permissions import BasePermission
 
 
 class IsOwnerOrModer(BasePermission):
-    message = 'Вы не являетесь владельцем или модератором'
+    message = 'Вы не являетесь владельцем или модератором!'
 
     def has_permission(self, request, view):
         if request.user.is_staff:
@@ -11,7 +11,7 @@ class IsOwnerOrModer(BasePermission):
 
 
 class IsModerator(BasePermission):
-    message = "У вас нет прав модератора!"
+    message = 'У вас нет прав модератора!'
 
     def has_permission(self, request, view):
         if request.user.role == 'moderator':
@@ -20,9 +20,16 @@ class IsModerator(BasePermission):
 
 
 class IsOwner(BasePermission):
-    message = "У вас нет прав владельца!"
+    message = 'У вас нет прав владельца!'
 
     def has_object_permission(self, request, view, obj):
         if request.user == obj.owner:
             return True
         return False
+
+
+class NotModer(BasePermission):
+    message = 'У вас нет прав создателя!'
+
+    def has_permission(self, request, view):
+        return not request.user.is_staff
