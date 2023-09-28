@@ -6,19 +6,22 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from course.models import Course, Lesson, Payment
-from course.permissions import IsOwnerOrModer, IsOwner, NotModer
+from course.paginators import LessonPaginator, CoursePaginator
+from course.permissions import IsOwnerOrModer, IsOwner, NotModer, IsModerator
 from course.serializers import CourseSerializer, LessonSerializer, PaymentSerializer
 
 
 class CourseViewSet(ModelViewSet):
+    """Вывод всех действий курсов"""
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
+    pagination_class = CoursePaginator
     permissions = {
         'create': NotModer,
-        'retrieve': IsOwnerOrModer,
+        'retrieve': IsOwner | IsModerator,
         'list': IsAuthenticated,
-        'update': IsOwnerOrModer,
-        'partial_update': IsOwnerOrModer,
+        'update': IsOwner | IsModerator,
+        'partial_update': IsOwner | IsModerator,
         'destroy': IsOwner
     }
 
@@ -34,6 +37,7 @@ class CourseViewSet(ModelViewSet):
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
+    """Создание урока"""
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated, NotModer]
 
@@ -44,29 +48,35 @@ class LessonCreateAPIView(generics.CreateAPIView):
 
 
 class LessonListAPIView(generics.ListAPIView):
+    """Вывод списка уроков"""
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsAuthenticated, IsOwnerOrModer]
+    pagination_class = LessonPaginator
+    permission_classes = [IsAuthenticated, IsOwner | IsModerator]
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
+    """Вывод урока по id"""
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsAuthenticated, IsOwnerOrModer]
+    permission_classes = [IsAuthenticated, IsOwner | IsModerator]
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
+    """Изменение урока"""
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsAuthenticated, IsOwnerOrModer]
+    permission_classes = [IsAuthenticated, IsOwner | IsModerator]
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
+    """Удаление урока"""
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
 
 
 class PaymentListAPIView(generics.ListAPIView):
+    """Вывод списока платежей"""
     serializer_class = PaymentSerializer
     queryset = Payment.objects.all().order_by('-id')
     filter_backends = [DjangoFilterBackend, OrderingFilter]
@@ -76,10 +86,12 @@ class PaymentListAPIView(generics.ListAPIView):
 
 
 class PaymentCreateAPIView(generics.CreateAPIView):
+    """Создание платежа"""
     serializer_class = PaymentSerializer
     queryset = Payment.objects.all()
 
 
 class PaymentDetailAPIView(generics.RetrieveAPIView):
+    """Вывод платежа по id"""
     serializer_class = PaymentSerializer
     queryset = Payment.objects.all()

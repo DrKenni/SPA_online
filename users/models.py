@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from course.models import NULLABLE
+from course.models import NULLABLE, Course
 
 
 class UserRoles(models.TextChoices):
@@ -23,3 +23,16 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+
+class Subscription(models.Model):
+    is_active = models.BooleanField(default=False, verbose_name='статус подписки')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='подписчик')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='курс')
+
+    def __str__(self):
+        return f'{self.user.email} {self.course.title} '
+
+    class Meta:
+        verbose_name = 'подписчик'
+        verbose_name_plural = 'подписчики'

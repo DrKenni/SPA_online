@@ -32,4 +32,4 @@ class NotModer(BasePermission):
     message = 'У вас нет прав создателя!'
 
     def has_permission(self, request, view):
-        return not request.user.is_staff
+        return not request.user.is_staff or request.user.is_superuser
