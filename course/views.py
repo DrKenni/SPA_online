@@ -7,8 +7,9 @@ from rest_framework.viewsets import ModelViewSet
 
 from course.models import Course, Lesson, Payment
 from course.paginators import LessonPaginator, CoursePaginator
-from course.permissions import IsOwnerOrModer, IsOwner, NotModer, IsModerator
+from course.permissions import IsOwner, NotModer, IsModerator
 from course.serializers import CourseSerializer, LessonSerializer, PaymentSerializer
+from course.services import get_session_of_payment, save_serializer, get_payment_data
 
 
 class CourseViewSet(ModelViewSet):
@@ -80,7 +81,7 @@ class PaymentListAPIView(generics.ListAPIView):
     serializer_class = PaymentSerializer
     queryset = Payment.objects.all().order_by('-id')
     filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = ('course', 'lesson', 'method', )
+    filterset_fields = ('course', 'method', )
     ordering_fields = ('date', )
     permission_classes = [IsAuthenticated]
 
@@ -90,8 +91,21 @@ class PaymentCreateAPIView(generics.CreateAPIView):
     serializer_class = PaymentSerializer
     queryset = Payment.objects.all()
 
+    def perform_create(self, serializer):
+        session = get_session_of_payment(self)
+        save_serializer(self, session, serializer)
+
 
 class PaymentDetailAPIView(generics.RetrieveAPIView):
     """Вывод платежа по id"""
     serializer_class = PaymentSerializer
     queryset = Payment.objects.all()
+
+    def get_object(self):
+        payment = super().get_object()
+
+        if payment.stripe_status != 'complete':
+            stripe_data = get_payment_data(payment.stripe_id)
+            payment.stripe_status = stripe_data.get('status')
+            payment.save()
+        return payment

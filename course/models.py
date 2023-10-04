@@ -55,6 +55,9 @@ class Payment(models.Model):
     amount = models.IntegerField(verbose_name='сумма оплаты')
     method = models.CharField(max_length=8, choices=PAYMENT_METHOD_CHOICES, verbose_name='способ оплаты', **NULLABLE,)
     date = models.DateField(auto_now_add=True, verbose_name='Дата оплаты')
+    stripe_id = models.CharField(max_length=300, verbose_name='id оплаты в stripe', **NULLABLE)
+    stripe_status = models.CharField(max_length=15, default='open', verbose_name='статус')
+    stripe_url = models.TextField(verbose_name='url на платеж', **NULLABLE)
 
     def __str__(self):
         return f'{self.method}: {self.amount} - {self.date}'

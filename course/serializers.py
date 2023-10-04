@@ -19,7 +19,13 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ('title', 'description', 'preview', 'is_published', 'quantity_lesson', 'lessons', 'subscription')
+        fields = ('title',
+                  'description',
+                  'preview',
+                  'is_published',
+                  'quantity_lesson',
+                  'lessons',
+                  'subscription')
 
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -27,15 +33,27 @@ class LessonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Lesson
-        fields = ('course', 'title', 'description', 'preview', 'video_url', 'is_published')
+        fields = ('course',
+                  'title',
+                  'description',
+                  'preview',
+                  'video_url',
+                  'is_published')
 
         validators = [VideoURLValidator(field='video_url'), ]
 
 
 class PaymentSerializer(serializers.ModelSerializer):
     course = CourseSerializer(**MANYABLE)
-    lesson = LessonSerializer(**MANYABLE)
 
     class Meta:
         model = Payment
-        fields = ('user', 'date', 'course', 'lesson', 'amount', 'method')
+        fields = ('id',
+                  'user',
+                  'date',
+                  'course',
+                  'amount',
+                  'method',
+                  'stripe_id',
+                  'stripe_status',
+                  'stripe_url')
