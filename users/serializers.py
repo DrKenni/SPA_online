@@ -13,11 +13,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 class SubscriptionCreateSerializer(serializers.ModelSerializer):
     course = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
-    # user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Subscription
-        fields = ('is_active', 'course', 'user')
+        fields = ('is_active', 'course')
 
 
 class SubscriptionListSerializer(serializers.ModelSerializer):

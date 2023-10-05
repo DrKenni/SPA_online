@@ -1,9 +1,13 @@
+from datetime import timezone
+
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from rest_framework.relations import SlugRelatedField
 
 from course.models import Course, Lesson, Payment
+from course.tasks import send_mail_about_update
 from course.validators import VideoURLValidator
+from users.models import Subscription
 from users.serializers import SubscriptionListSerializer
 
 MANYABLE = {'many': True, 'read_only': True}
@@ -16,6 +20,14 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_lessons(self, course):
         return [lesson.title for lesson in Lesson.objects.filter(course=course)]
+
+    def update(self, instance, validated_data):
+        sub_s = Subscription.objects.filter(course_id=instance.id, is_active=True)
+        instance.updated_at = timezone.now()
+        instance.save()
+        if sub_s.exists():
+            send_mail_about_update.delay(instance.id)
+        return super().update(instance, validated_data)
 
     class Meta:
         model = Course
