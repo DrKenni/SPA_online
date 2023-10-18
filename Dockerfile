@@ -8,4 +8,4 @@ RUN poetry init
 
 COPY .  .
 
-#CMD ["python", "manage.py", "runserver"]
+CMD ["python", "manage.py", "runserver"]
